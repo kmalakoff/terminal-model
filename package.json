@@ -1,0 +1,48 @@
+{
+  "name": "terminal-model",
+  "version": "0.0.0",
+  "description": "Terminal emulation for streaming ANSI output with proper whitespace preservation",
+  "keywords": [
+    "terminal",
+    "ansi",
+    "streaming",
+    "parser",
+    "sgr",
+    "escape-sequences"
+  ],
+  "license": "MIT",
+  "type": "module",
+  "exports": {
+    ".": {
+      "import": "./dist/esm/index.js",
+      "require": "./dist/cjs/index.js"
+    },
+    "./package.json": "./package.json"
+  },
+  "main": "dist/cjs/index.js",
+  "source": "src/index.ts",
+  "types": "dist/cjs/index.d.ts",
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "tsds build",
+    "format": "tsds format",
+    "prepublishOnly": "tsds validate",
+    "test": "tsds test:node --no-timeouts",
+    "test:engines": "nvu engines tsds test:node --no-timeouts",
+    "version": "tsds version"
+  },
+  "dependencies": {
+    "readable-stream": "^2.0.2"
+  },
+  "devDependencies": {
+    "@types/mocha": "*",
+    "@types/node": "*",
+    "ts-dev-stack": "*",
+    "tsds-config": "*"
+  },
+  "engines": {
+    "node": ">=0.8"
+  }
+}
