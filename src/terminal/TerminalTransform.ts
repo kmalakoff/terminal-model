@@ -108,11 +108,11 @@ export default class TerminalTransform extends Transform {
   /**
    * Cleanup on destroy
    */
-  destroy(error?: Error): this {
+  destroy(error?: Error | null): this {
     this.strategy.dispose();
     this.terminal.dispose();
     this.pendingLines = [];
-    return super.destroy(error);
+    return super.destroy(error || undefined);
   }
 
   /**
