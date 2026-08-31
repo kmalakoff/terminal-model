@@ -1,1 +1,1 @@
-ignores: ["node-version-use", "ts-dev-stack", "spawn-streaming", "readable-stream", "exit-compat"]
+ignores: ["terminal-model", "node-version-use", "ts-dev-stack", "spawn-streaming", "readable-stream", "exit-compat"]
