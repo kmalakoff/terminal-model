@@ -113,6 +113,10 @@ export class SgrComposer {
    * Compose attributes - new attributes override old ones
    */
   static compose(base: SgrAttributes, overlay: SgrAttributes): SgrAttributes {
+    // If overlay is empty (reset), clear everything
+    if (SgrComposer.isEmpty(overlay)) {
+      return {};
+    }
     return { ...base, ...overlay };
   }
 

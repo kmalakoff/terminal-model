@@ -77,6 +77,38 @@ describe('StreamingTerminal', () => {
       assert.ok(line.indexOf('\x1b[31m') !== -1);
       assert.ok(line.indexOf('\x1b[0m') !== -1);
     });
+
+    it('should not carry color state after SGR reset within same line', () => {
+      const terminal = new StreamingTerminal();
+      // Input: color "red", text "[info]", reset, text "html generated at ./docs", newline
+      terminal.write('\x1b[31m[info]\x1b[0mhtml generated at ./docs\n');
+
+      const line = terminal.renderLine();
+      // The reset should come BEFORE "html generated", not at the very end
+      // Find the position of reset and "html"
+      const resetPos = line.indexOf('\x1b[0m');
+      const htmlPos = line.indexOf('html');
+
+      // Reset should come before html (not after)
+      assert.ok(resetPos < htmlPos, `Reset at ${resetPos} should come before html at ${htmlPos}. Line: ${JSON.stringify(line)}`);
+
+      // There should be exactly one reset (from the input), not multiple
+      // biome-ignore lint/suspicious/noControlCharactersInRegex: ANSI reset sequence
+      const resetCount = (line.match(/\x1b\[0m/g) || []).length;
+      assert.strictEqual(resetCount, 1, `Expected 1 reset, got ${resetCount}. Line: ${JSON.stringify(line)}`);
+    });
+
+    it('should not add extra reset at end of line when SGR was already reset', () => {
+      const terminal = new StreamingTerminal();
+      // Input: color "cyan", text "[info]", reset, text "html", newline
+      terminal.write('\x1b[96m[info]\x1b[0mhtml\n');
+
+      const line = terminal.renderLine();
+      // Should have exactly one reset (from the input), not two
+      // biome-ignore lint/suspicious/noControlCharactersInRegex: ANSI reset sequence
+      const resetCount = (line.match(/\x1b\[0m/g) || []).length;
+      assert.strictEqual(resetCount, 1, `Expected 1 reset, got ${resetCount}. Line: ${JSON.stringify(line)}`);
+    });
   });
 
   describe('cursor save/restore (Bug #2 fix)', () => {
