@@ -34,7 +34,7 @@
     "version": "tsds version"
   },
   "dependencies": {
-    "readable-stream": "^2.0.2"
+    "readable-stream": "2.3.8"
   },
   "devDependencies": {
     "@types/mocha": "*",
