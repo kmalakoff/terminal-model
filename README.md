@@ -1,6 +1,6 @@
 # terminal-model
 
-A Node.js library for terminal emulation that handles streaming ANSI output with proper whitespace preservation. Designed to parse and process ANSI escape sequences from subprocess output, making it suitable for building terminal-based user interfaces and streaming command output with correct formatting.
+Parse streaming ANSI output while preserving cursor changes, styles, and whitespace. Use it to turn subprocess output into stable terminal lines.
 
 ## Features
 
@@ -23,19 +23,17 @@ npm install terminal-model
 
 ## Quick Start
 
-```typescript
-import { TerminalTransform, StatefulTimeoutStrategy } from 'terminal-model'
+```js
+var model = require('terminal-model');
+var terminal = new model.StreamingTerminal();
 
-const terminal = new TerminalTransform({
-  strategy: new StatefulTimeoutStrategy()
-})
+terminal.setLineReadyCallback(function () {
+  console.log(terminal.renderLine());
+  terminal.reset();
+});
 
-terminal.onLine((line) => {
-  console.log('Received line:', line)
-})
-
-terminal.write('Hello, World!\n')
-terminal.write('\x1b[31mRed text\x1b[0m\n')
+terminal.write('Hello, World!\n');
+terminal.write('\x1b[31mRed text\x1b[0m\n');
 ```
 
 ## API
@@ -74,6 +72,8 @@ terminal.dispose()
 ### TerminalTransform
 
 A transform stream wrapper around StreamingTerminal with configurable emission strategies.
+
+In the current release, newline input can trigger both parser and strategy emissions. If each completed line must be delivered exactly once, use `StreamingTerminal` directly as shown above.
 
 ```typescript
 import { TerminalTransform, TimeoutStrategy } from 'terminal-model'
@@ -125,22 +125,6 @@ SgrComposer.isEmpty(attrs) // false
 
 // Reset to defaults
 const reset = SgrComposer.reset()
-```
-
-### AnsiParser
-
-Static class for detecting and extracting ANSI sequences from strings.
-
-```typescript
-import { AnsiParser } from 'terminal-model'
-
-// Parse next sequence at position
-const result = AnsiParser.parseNext('\x1b[31mHello', 0)
-// { type: 'csi', length: 4, data: {...} }
-
-// Check for incomplete sequences at end
-const incomplete = AnsiParser.getIncompleteSequence('\x1b[31')
-// '\x1b[31'
 ```
 
 ### Line Emission Strategies
@@ -200,31 +184,6 @@ Multi-line or incompatible with streaming:
 - `\r` (carriage return)
 - `\t` (tab)
 - `\x08` (backspace)
-
-## Architecture
-
-```
-┌─────────────────────────────────────────────────┐
-│                 terminal-model                   │
-├─────────────────────────────────────────────────┤
-│  Entry Point (src/index.ts)                     │
-│  Exports: StreamingTerminal, TerminalTransform,  │
-│           SgrComposer, Strategies, Types         │
-└───────────────┬─────────────────────────────────┘
-                │
-    ┌-----------+-----------+-----------+
-    ▼           ▼           ▼           ▼
-┌────────┐ ┌────────┐ ┌────────┐ ┌────────┐
-│  ANSI  │ │Terminal│ │ SGR    │ │Strategy│
-│ Parser │ │ State  │ │Composer│ │ Pattern│
-└────────┘ └────────┘ └────────┘ └────────┘
-                │
-                ▼
-      ┌─────────────────────┐
-      │  TerminalTransform  │
-      │  (Transform Stream) │
-      └─────────────────────┘
-```
 
 ## License
 
